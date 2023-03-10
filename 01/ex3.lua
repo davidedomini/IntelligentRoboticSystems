@@ -24,51 +24,46 @@ function step()
 
 
 	prox_front = robot.proximity[1].value + robot.proximity[24].value
-	prox_back = robot.proximity[12].value + robot.proximity[13].value
+	prox_front_east = robot.proximity[21].value + robot.proximity[20].value
+	prox_front_west = robot.proximity[5].value + robot.proximity[4].value
 
-	if prox_front > PROX_THRESHOLD or prox_back > PROX_THRESHOLD then
+	if prox_front > PROX_THRESHOLD or prox_front_east > PROX_THRESHOLD or prox_front_west > PROX_THRESHOLD then
 		log("avoid obstacle")
-		robot.wheels.set_velocity(0,Dv)
+		robot.wheels.set_velocity(-(12+Dv),12+Dv)
 		n_steps = n_steps + 1
 
 	elseif n_steps > 0 then
 
 		n_steps = n_steps + 1
-
+		log("since avoided obstacle i go straight")
 		robot.wheels.set_velocity(Dv,Dv)
 		if (n_steps % MOVE_STEPS == 0) then
 			n_steps = 0
 		end
 	else
-		l = {1,2,3,4} --random init
-
-		l[1] = robot.light[1].value + robot.light[24].value --light_front
-		l[2] = robot.light[12].value + robot.light[13].value --light_back
-		l[3] = robot.light[18].value + robot.light[19].value --light_right
-		l[4] = robot.light[6].value + robot.light[7].value --light_left
 
 		max = 0
 		i_max = 1
-		for i=1,4 do
-			if l[i] > max then
-				max = l[i]
+		for i=1,24 do
+			if robot.light[i].value > max then
+				max = robot.light[i].value
 				i_max = i
 			end
 		end
 
-		if i_max == 1 then
-			--light front
+		log("i_max"..i_max)
+
+		if i_max == 1 or i_max == 24 then
 			robot.wheels.set_velocity(Dv,Dv)
-		elseif i_max == 2 then
-			--light back
-			robot.wheels.set_velocity(-Dv,-Dv)
-		elseif i_max == 3 then
-			--light right
-			robot.wheels.set_velocity(Dv,0)
-		elseif i_max == 4 then
-			--light left
-			robot.wheels.set_velocity(0,Dv)
+		elseif i_max > 1 and i_max <= 12 then
+			log("turn left")
+			robot.wheels.set_velocity(-Dv,Dv)
+		elseif i_max >= 13 and i_max < 24 then
+			log("turn left")
+			robot.wheels.set_velocity(Dv,-Dv)
 		end
+
+
 	end
 
 
@@ -94,4 +89,8 @@ end
      from the simulation ]]
 function destroy()
    -- put your code here
+   x = robot.positioning.position.x
+   y = robot.positioning.position.y
+   d = math.sqrt(x^2 + y^2)
+   log("distance: "..d)
 end
