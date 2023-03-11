@@ -2,10 +2,10 @@
 
 MOVE_STEPS = 15
 MAX_VELOCITY = 10
-PROX_THRESHOLD = 1.0
+PROX_THRESHOLD = 0.4
 Dv = 15
-
 n_steps = 0
+
 
 
 --[[ This function is executed every time you press the 'execute'
@@ -18,6 +18,7 @@ function init()
 end
 
 
+
 --[[ This function is executed at each time step
      It must contain the logic of your controller ]]
 function step()
@@ -28,13 +29,24 @@ function step()
 		right_v = robot.random.uniform(0,MAX_VELOCITY)
 	end
 
-	prox_front = robot.proximity[1].value + robot.proximity[24].value
-	prox_back = robot.proximity[12].value + robot.proximity[13].value
+	max = 0
+	i_max = 1
+	for i=1,24 do
+		if robot.proximity[i].value > max then
+			max = robot.proximity[i].value
+			i_max = i
+		end
+	end
 
-	if prox_front > PROX_THRESHOLD or prox_back > PROX_THRESHOLD then
-		n_step = 0
-		log("avoid obstacle")
-		left_v = 0
+	if i_max >= 1 and i_max <= 6 and max >= PROX_THRESHOLD then
+		-- Turn right
+		log("avoiding, turn right")
+		left_v = Dv
+		right_v = -Dv
+	elseif  i_max >= 19 and i_max <= 24 and max >= PROX_THRESHOLD then
+		-- Turn left
+		log("avoiding, turn left")
+		left_v = -Dv
 		right_v = Dv
 	end
 

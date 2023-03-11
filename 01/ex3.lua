@@ -2,9 +2,8 @@
 
 MOVE_STEPS = 15
 MAX_VELOCITY = 10
-PROX_THRESHOLD = 1.0
+PROX_THRESHOLD = 0.4
 Dv = 15
-
 n_steps = 0
 
 
@@ -22,26 +21,45 @@ end
      It must contain the logic of your controller ]]
 function step()
 
+	danger = 0
 
-	prox_front = robot.proximity[1].value + robot.proximity[24].value
-	prox_front_east = robot.proximity[21].value + robot.proximity[20].value
-	prox_front_west = robot.proximity[5].value + robot.proximity[4].value
+	max = 0
+	i_max = 1
+	for i=1,24 do
+		if robot.proximity[i].value > max then
+			max = robot.proximity[i].value
+			i_max = i
+		end
+	end
 
-	if prox_front > PROX_THRESHOLD or prox_front_east > PROX_THRESHOLD or prox_front_west > PROX_THRESHOLD then
-		log("avoid obstacle")
-		robot.wheels.set_velocity(-(12+Dv),12+Dv)
+	if i_max >= 1 and i_max <= 6 and max >= PROX_THRESHOLD then
+		-- Turn right
+		log("[AVOID] -- turn right")
+		left_v = Dv
+		right_v = -Dv
+		danger = 1
+	elseif  i_max >= 19 and i_max <= 24 and max >= PROX_THRESHOLD then
+		-- Turn left
+		log("[AVOID] -- turn left")
+		left_v = -Dv
+		right_v = Dv
+		danger = 1
+	end
+
+	if  n_steps > 0 and danger == 0 then
+		-- go away
 		n_steps = n_steps + 1
-
-	elseif n_steps > 0 then
-
-		n_steps = n_steps + 1
-		log("since avoided obstacle i go straight")
 		robot.wheels.set_velocity(Dv,Dv)
 		if (n_steps % MOVE_STEPS == 0) then
 			n_steps = 0
 		end
-	else
 
+	elseif danger == 1 then
+		-- turn
+		n_steps = n_steps + 1
+		robot.wheels.set_velocity(left_v, right_v)
+	else
+		-- follow the light
 		max = 0
 		i_max = 1
 		for i=1,24 do
@@ -51,21 +69,16 @@ function step()
 			end
 		end
 
-		log("i_max"..i_max)
-
 		if i_max == 1 or i_max == 24 then
 			robot.wheels.set_velocity(Dv,Dv)
 		elseif i_max > 1 and i_max <= 12 then
-			log("turn left")
+			log("[LIGHT] -- turn left")
 			robot.wheels.set_velocity(-Dv,Dv)
 		elseif i_max >= 13 and i_max < 24 then
-			log("turn left")
+			log("[LIGHT] -- turn right")
 			robot.wheels.set_velocity(Dv,-Dv)
 		end
-
-
 	end
-
 
 end
 

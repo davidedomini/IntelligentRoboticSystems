@@ -7,7 +7,7 @@
   <!-- ************************* -->
   <framework>
     <system threads="0" />
-    <experiment length="300"
+    <experiment length="100"
                 ticks_per_second="10"
      />
 <!--    You may want to set the seed of the RNG by: random_seed = "1" (or any n>0) in experiment  -->
