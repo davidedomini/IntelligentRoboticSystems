@@ -8,7 +8,6 @@ n_steps = 0
 n_steps_avoid = 0
 avoiding = false
 
-
 function level_random_walk()
     if (n_steps % MOVE_STEPS) == 0 then
         left_v = robot.random.uniform(0,MAX_VELOCITY)
@@ -32,6 +31,7 @@ function level_phototaxis()
     end
 
     if max ~= 0 then
+        n_steps = 0
         log("LIGHT --- inibisco RANDOM")
         -- inibisco quello sotto
         n_steps = 0
@@ -66,6 +66,7 @@ function level_obstacle_avoidance()
 	end
 
 	if max >= PROX_THRESHOLD then
+        n_steps = 0
         -- need to avoid
         log("AVOID --- inibisco LIGHT")
         n_steps_avoid = 0
@@ -132,7 +133,6 @@ function reset()
 	n_steps_avoid = 0
 	avoiding = false
 end
-
 
 
 --[[ This function is executed only once, when the robot is removed
