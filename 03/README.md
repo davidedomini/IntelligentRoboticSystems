@@ -24,3 +24,26 @@ Each level is a Finite State Machine:
 Since in Argos only sequential processes can be run the subsumption arichitecture has been implemented with some variants. In order to implement and extensible code each level is represented by a function, the step function only calls the level with the highest priority, then each level:
 1. Calls the lower level 
 2. Executes its behaviour, if it is needed it will inhibit the underlying levels, otherwise it let the signal they emit (i.e., the velocity) pass. 
+
+## Performance 
+
+To evaluate the performance of the robot's behavior, I carried out some experiments, all in the same arena with: 15 normal obstacles, 4 long obstacles, 3 high obstacles, with light intensity of 2.
+The task of the robot is to reach the light (within a radius of 0.5) within a fixed time (1000 ticks).
+In the first experiment, only one robot was present in the arena and it reached the objective 9 out of 10 times.
+In the second experiment, there were 5 robots present and the results are as follows:
+
+| Experiment | Succeeded Robots |
+|------------|------------------|
+| 1          | 3/5              |
+| 2          | 3/5              |
+| 3          | 4/5              |
+| 4          | 4/5              |
+| 5          | 0/5              |
+| 6          | 3/5              |
+| 7          | 4/5              |
+| 8          | 4/5              |
+| 9          | 4/5              |
+| 10         | 4/5              |
+
+
+## Considerations
