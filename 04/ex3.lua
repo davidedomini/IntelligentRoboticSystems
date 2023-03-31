@@ -5,6 +5,7 @@ L = 0
 n_steps = 0
 PROX_TH = 0.4
 MOVE_STEPS = 10
+local vector = require "vector"
 
 
 --[[ This function is executed every time you press the 'execute'
@@ -14,20 +15,21 @@ function init()
 	n_steps = 0
 end
 
-function check_vel(vl, vr)
-    if vl > MAX_VELOCITY then
-        vl = MAX_VELOCITY
+function limitVelocity(v)
+    if v > MAX_VELOCITY then
+      return MAX_VELOCITY
+    elseif v < -MAX_VELOCITY then
+      return -MAX_VELOCITY
+    else
+      return v
     end
-    if vr > MAX_VELOCITY then
-        vr = MAX_VELOCITY
-    end
-    return vl, vr
-end
+  end
 
 function toDifferential(v)
     vl = v.length + (-L/2) * v.angle
     vr = v.length + L/2 * v.angle
-    vl, vr = check_vel(vl, vr)
+    vl = limitVelocity(vl)
+    vr = limitVelocity(vr)
     return vl, vr
 end
 
@@ -63,7 +65,7 @@ function random_walk()
     max, i_max = find_prox()
     l, l_index = find_light()
 
-	if max < PROX_TH && l == 0 then
+	if max < PROX_TH and l == 0 then
         if (n_steps % MOVE_STEPS) == 0 then
             v_rw.angle = robot.random.uniform(-math.pi, math.pi)
             v_rw.length = 1
@@ -83,17 +85,9 @@ function random_walk()
 end
 
 function obstacle_avoidance()
-    v_oa = {length = 0.0, angle = 0.0}
-
     max, i_max = find_prox()
-
-    if max >= PROX_TH then
-        log("AVOIDING")
-        v_oa.length = max
-        v_oa.angle = - math.pi
-    end
-
-    return v_oa
+    proximityAngle = robot.proximity[i_max].angle
+    return { length = max, angle = (-(proximityAngle/proximityAngle)*math.pi + proximityAngle) }
 end
 
 function phototaxis()
@@ -104,34 +98,30 @@ function phototaxis()
     return v_pa
 end
 
---[[ This function is executed at each time step
-     It must contain the logic of your controller ]]
 function step()
-    local vector = require "vector"
-    v_rw = random_walk()
-    v_oa = obstacle_avoidance()
-    v_pa = phototaxis()
-    v_1 = vector.vec2_polar_sum(v_rw, v_oa)
-    v = vector.vec2_polar_sum(v_1, v_pa)
-    vl, vr = toDifferential(v)
+
+    behaviors = {
+        random_walk(),
+        obstacle_avoidance(),
+        phototaxis()
+    }
+
+    result_vector = { length = 0.0,  angle = 0.0 }
+
+    for i=1,#behaviors do
+        result_vector = vector.vec2_polar_sum(result_vector, behaviors[i])
+    end
+
+    vl, vr = toDifferential(result_vector)
     robot.wheels.set_velocity(vl,vr)
 
 end
 
 
---[[ This function is executed every time you press the 'reset'
-     button in the GUI. It is supposed to restore the state
-     of the controller to whatever it was right after init() was
-     called. The state of sensors and actuators is reset
-     automatically by ARGoS. ]]
 function reset()
 end
 
-
---[[ This function is executed only once, when the robot is removed
-     from the simulation ]]
 function destroy()
-   -- put your code here
    x = robot.positioning.position.x
    y = robot.positioning.position.y
    d = math.sqrt(x^2 + y^2)
