@@ -87,7 +87,7 @@ end
 function obstacle_avoidance()
     max, i_max = find_prox()
     proximityAngle = robot.proximity[i_max].angle
-    return { length = max, angle = (-(proximityAngle/proximityAngle)*math.pi + proximityAngle) }
+    return { length = max, angle = (-(math.abs(proximityAngle)/proximityAngle)*math.pi + proximityAngle) }
 end
 
 function phototaxis()
