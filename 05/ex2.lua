@@ -115,7 +115,7 @@ function level_aggregation()
 
         floor = check_floor()
 
-        Ps = math.min(Ps_max, S+alpha*N +( Ds*floor))
+        Ps = math.min(Ps_max, S+alpha*N + (Ds*floor))
         log("Ps:" .. Ps)
         t = robot.random.uniform()
 
